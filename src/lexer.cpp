@@ -5,63 +5,63 @@ using namespace std;
 static const string vv[]   = {"||", "&&", "==", "!=", "<=", ">=", "<", ">", "-", "+", "/", "*"};
 static const string cont[] = {"or", "and", "eq", "ne", "le", "ge", "l", "g", "min", "add", "div", "mul"};
 
-void assert(bool b, string str) {
+void lingual_assert(bool b, string str) {
     if (!b)
         throw logic_error("Parse Error: " + str);
 }
 
-void exprproc(string str, ostream& os) {
+void lex_expression(string str, ostream& os) {
     smatch res;
     if (regex_match(str, res, regex("\\s*(\\|\\||&&|==|!=|<=|>=)\\s*(.*)\\s*$"))) {
         for (int i = 0; i <= 12; i++) {
-            assert(i != 12, str);
+            lingual_assert(i != 12, str);
             if (vv[i] == res[1].str()) {
                 os << "<SYM symnum=\"" << cont[i] << "\"/> ";
                 break;
             }
         }
-        exprproc(res[2].str(), os);
+        lex_expression(res[2].str(), os);
         return;
     }
     if (regex_match(str, res, regex("\\s*(<|>|-|\\+|/|\\*)\\s*(.*)\\s*$"))) {
         for (int i = 0; i <= 12; i++) {
-            assert(i != 12, str);
+            lingual_assert(i != 12, str);
             if (vv[i] == res[1].str()) {
                 os << "<SYM symnum=\"" << cont[i] << "\"/> ";
                 break;
             }
         }
-        exprproc(res[2].str(), os);
+        lex_expression(res[2].str(), os);
         return;
     }
     if (regex_match(str, res, regex("\\s*\\(\\s*(.*)\\s*$"))) {
         os << "(";
-        exprproc(res[1].str(), os);
+        lex_expression(res[1].str(), os);
         return;
     }
     if (regex_match(str, res, regex("\\s*\\)\\s*(.*)\\s*$"))) {
         os << ")";
-        exprproc(res[1].str(), os);
+        lex_expression(res[1].str(), os);
         return;
     }
     if (regex_match(str, res, regex("\\s*([0-9]+)\\s*(.*)\\s*$"))) {
         os << "<NUM number=\"" << res[1] << "\"/> ";
-        exprproc(res[2].str(), os);
+        lex_expression(res[2].str(), os);
         return;
     }
     if (regex_match(str, res, regex("\\s*([a-zA-Z]+)\\s*(.*)\\s*$"))) {
         os << "<ID id=\"" << res[1] << "\"/> ";
-        exprproc(res[2].str(), os);
+        lex_expression(res[2].str(), os);
         return;
     }
     if (regex_match(str, res, regex("\\s*$"))) {
         return;
     }
-    assert(false, str);
+    lingual_assert(false, str);
     return;
 }
 
-void parenthesesproc(istream& is, ostream& os) {
+void lex_parentheses(istream& is, ostream& os) {
     stack<string> stq;
     smatch res;
     string str;
@@ -83,35 +83,35 @@ void parenthesesproc(istream& is, ostream& os) {
     return;
 }
 
-void statementproc(string str, ostream& os) {
+void lex_statement(string str, ostream& os) {
     smatch res;
     if (regex_match(str, res, regex("\\s*([a-zA-Z]+)\\s*=\\s*(.+)\\s*$"))) {
         os << "<ID id=\"" << res[1] << "\"/> ";
         os << "<EXPR> ";
         stringstream strr;
-        exprproc(res[2].str(), strr);
-        parenthesesproc(strr, os);
+        lex_expression(res[2].str(), strr);
+        lex_parentheses(strr, os);
         os << "</EXPR> ";
         return;
     }
-    assert(false, str);
+    lingual_assert(false, str);
 }
 
-void idlistproc(string str, ostream& os) {
+void lex_idlist(string str, ostream& os) {
     smatch res;
     if (regex_match(str, res, regex("\\s*([a-zA-Z]+)\\s*,\\s*(.+)\\s*$"))) {
         os << "<ID id=\"" << res[1] << "\"/> ";
-        idlistproc(res[2].str(), os);
+        lex_idlist(res[2].str(), os);
         return;
     }
     if (regex_match(str, res, regex("\\s*([a-zA-Z]+)\\s*$"))) {
         os << "<ID id=\"" << res[1] << "\"/> ";
         return;
     }
-    assert(false, str);
+    lingual_assert(false, str);
 }
 
-void commandproc(string str, ostream& os) {
+void lex_commands(string str, ostream& os) {
     string tomatch[] = {
         "REM.*$",
         "LET\\s+([a-zA-Z]*)\\s*=\\s*(.+)\\s*$",
@@ -131,15 +131,15 @@ void commandproc(string str, ostream& os) {
         os << "<LET id=\"" << res[1].str() << "\"> ";
         os << "<EXPR> ";
         stringstream strr;
-        exprproc(res[2].str(), strr);
-        parenthesesproc(strr, os);
+        lex_expression(res[2].str(), strr);
+        lex_parentheses(strr, os);
         os << "</EXPR> ";
         os << "</LET> ";
         return;
     }
     if (regex_match(str, res, regex(tomatch[2]))) {
         os << "<INPUT> ";
-        idlistproc(res[1].str(), os);
+        lex_idlist(res[1].str(), os);
         os << "</INPUT> ";
         return;
     }
@@ -147,8 +147,8 @@ void commandproc(string str, ostream& os) {
         os << "<EXIT> ";
         os << "<EXPR> ";
         stringstream strr;
-        exprproc(res[1].str(), strr);
-        parenthesesproc(strr, os);
+        lex_expression(res[1].str(), strr);
+        lex_parentheses(strr, os);
         os << "</EXPR> ";
         os << "</EXIT> ";
         return;
@@ -161,8 +161,8 @@ void commandproc(string str, ostream& os) {
         os << "<IF dest=\"" << res[2] << "\"> ";
         os << "<EXPR> ";
         stringstream strr;
-        exprproc(res[1].str(), strr);
-        parenthesesproc(strr, os);
+        lex_expression(res[1].str(), strr);
+        lex_parentheses(strr, os);
         os << "</EXPR> ";
         os << "</IF> ";
         return;
@@ -170,12 +170,12 @@ void commandproc(string str, ostream& os) {
     if (regex_match(str, res, regex(tomatch[6]))) {
         os << "<FOR> ";
         os << "<STAM>";
-        statementproc(res[1].str(), os);
+        lex_statement(res[1].str(), os);
         os << "</STAM>";
         os << "<EXPR> ";
         stringstream strr;
-        exprproc(res[2].str(), strr);
-        parenthesesproc(strr, os);
+        lex_expression(res[2].str(), strr);
+        lex_parentheses(strr, os);
         os << "</EXPR> ";
         os << "</FOR> ";
         return;
@@ -188,24 +188,24 @@ void commandproc(string str, ostream& os) {
         os << "<SET id=\"" << res[1].str() << "\"> ";
         os << "<EXPR> ";
         stringstream strr;
-        exprproc(res[2].str(), strr);
-        parenthesesproc(strr, os);
+        lex_expression(res[2].str(), strr);
+        lex_parentheses(strr, os);
         os << "</EXPR> ";
         os << "</SET> ";
         return;
     }
-    assert(false, str);
+    lingual_assert(false, str);
     return;
 }
 
-void lineproc(istream& is, ostream& os) {
+void lex_inputline(istream& is, ostream& os) {
     string str;
     smatch res;
     os << "<PRGM> ";
     while (getline(is, str)) {
-        assert(regex_match(str, res, regex("\\s*([0-9]+)\\s+(.*)$")), str);
+        lingual_assert(regex_match(str, res, regex("\\s*([0-9]+)\\s+(.*)$")), str);
         os << "<LINE linenum=\"" << res[1] << "\"/> ";
-        commandproc(res[2].str(), os);
+        lex_commands(res[2].str(), os);
     }
     os << "</PRGM> ";
 }

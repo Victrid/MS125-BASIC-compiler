@@ -9,14 +9,14 @@
 #include <stdexcept>
 #include <string>
 
-void assert(bool b, std::string str);
+void lingual_assert(bool b, std::string str);
 
-void exprproc(std::string str, std::ostream& os);
-void statementproc(std::string str, std::ostream& os);
-void parenthesesproc(std::istream& is, std::ostream& os);
-void idlistproc(std::string str, std::ostream& os);
-void commandproc(std::string str, std::ostream& os);
+void lex_expression(std::string str, std::ostream& os);
+void lex_statement(std::string str, std::ostream& os);
+void lex_parentheses(std::istream& is, std::ostream& os);
+void lex_idlist(std::string str, std::ostream& os);
+void lex_commands(std::string str, std::ostream& os);
 
-void lineproc(std::istream& is, std::ostream& os);
+void lex_inputline(std::istream& is, std::ostream& os);
 
 #endif

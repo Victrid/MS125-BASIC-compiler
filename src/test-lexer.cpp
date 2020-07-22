@@ -7,7 +7,7 @@ using namespace std;
         fstream os, f;                                                   \
         f.open("testfiles/testcases/control_test/control_" #AAA ".txt"); \
         os.open("/dev/null");                                            \
-        EXPECT_NO_THROW(lineproc(f, os));                                \
+        EXPECT_NO_THROW(lex_inputline(f, os));                                \
     }
 
 #define B(AAA)                                                       \
@@ -15,7 +15,7 @@ using namespace std;
         fstream os, f;                                               \
         f.open("testfiles/testcases/basic_test/basic_" #AAA ".txt"); \
         os.open("/dev/null");                                        \
-        EXPECT_NO_THROW(lineproc(f, os));                            \
+        EXPECT_NO_THROW(lex_inputline(f, os));                            \
     }
 
 #define O(AAA)                                                 \
@@ -23,7 +23,7 @@ using namespace std;
         fstream os, f;                                         \
         f.open("testfiles/testcases/op_test/op_" #AAA ".txt"); \
         os.open("/dev/null");                                  \
-        EXPECT_NO_THROW(lineproc(f, os));                      \
+        EXPECT_NO_THROW(lex_inputline(f, os));                      \
     }
 
 O(1);
