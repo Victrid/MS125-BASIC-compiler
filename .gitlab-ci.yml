@@ -1,0 +1,18 @@
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - make
+
+test_lexer:
+  stage: test
+  script:
+    - make unit_test_lexer
+
+test_parser:
+  stage: test
+  script:
+    - make unit_test_parser
