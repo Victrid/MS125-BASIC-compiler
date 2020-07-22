@@ -1,77 +1,79 @@
 #include "lexer.hpp"
 
-void assert(bool b, std::string str) {
+using namespace std;
+
+void assert(bool b, string str) {
     if (!b)
-        throw std::logic_error("Parse Error: " + str);
+        throw logic_error("Parse Error: " + str);
 }
 
-void exprproc(std::string str, std::ostream& os) {
-    std::smatch res;
-    if (std::regex_match(str, res, std::regex("\\s*(\\|\\||&&|==|!=|<=|>=)\\s*(.*)\\s*$"))) {
+void exprproc(string str, ostream& os) {
+    smatch res;
+    if (regex_match(str, res, regex("\\s*(\\|\\||&&|==|!=|<=|>=)\\s*(.*)\\s*$"))) {
         os << "<SYM symnum=\"" << res[1].str() << "\"/> ";
         exprproc(res[2].str(), os);
         return;
     }
-    if (std::regex_match(str, res, std::regex("\\s*(<|>|-|\\+|/|\\*)\\s*(.*)\\s*$"))) {
+    if (regex_match(str, res, regex("\\s*(<|>|-|\\+|/|\\*)\\s*(.*)\\s*$"))) {
         os << "<SYM symnum=\"" << res[1].str() << "\"/> ";
         exprproc(res[2].str(), os);
         return;
     }
-    if (std::regex_match(str, res, std::regex("\\s*\\(\\s*(.*)\\s*$"))) {
+    if (regex_match(str, res, regex("\\s*\\(\\s*(.*)\\s*$"))) {
         os << "(";
         exprproc(res[1].str(), os);
         return;
     }
-    if (std::regex_match(str, res, std::regex("\\s*\\)\\s*(.*)\\s*$"))) {
+    if (regex_match(str, res, regex("\\s*\\)\\s*(.*)\\s*$"))) {
         os << ")";
         exprproc(res[1].str(), os);
         return;
     }
-    if (std::regex_match(str, res, std::regex("\\s*([0-9]+)\\s*(.*)\\s*$"))) {
+    if (regex_match(str, res, regex("\\s*([0-9]+)\\s*(.*)\\s*$"))) {
         os << "<NUM number=\"" << res[1] << "\"/> ";
         exprproc(res[2].str(), os);
         return;
     }
-    if (std::regex_match(str, res, std::regex("\\s*([a-zA-Z]+)\\s*(.*)\\s*$"))) {
+    if (regex_match(str, res, regex("\\s*([a-zA-Z]+)\\s*(.*)\\s*$"))) {
         os << "<ID id=\"" << res[1] << "\"/> ";
         exprproc(res[2].str(), os);
         return;
     }
-    if (std::regex_match(str, res, std::regex("\\s*$"))) {
+    if (regex_match(str, res, regex("\\s*$"))) {
         return;
     }
     assert(false, str);
     return;
 }
 
-void parenthesesproc(std::istream& is, std::ostream& os) {
-    std::stack<std::string> stq;
-    std::smatch res;
-    std::string str;
+void parenthesesproc(istream& is, ostream& os) {
+    stack<string> stq;
+    smatch res;
+    string str;
     int stage = 0;
-    std::ostringstream ost;
+    ostringstream ost;
     ost << is.rdbuf();
     str = ost.str();
-    while (std::regex_match(str, res, std::regex("(.*)\\(([^\\(\\)]*)\\)(.*)$"))) {
+    while (regex_match(str, res, regex("(.*)\\(([^\\(\\)]*)\\)(.*)$"))) {
         stq.push(res[2].str());
-        str = std::regex_replace(str, std::regex("(.*)(\\([^\\(\\)]*\\))(.*)$"), "$1<mstr num=" + std::to_string(stage) + "/>$3");
+        str = regex_replace(str, regex("(.*)(\\([^\\(\\)]*\\))(.*)$"), "$1<mstr num=" + to_string(stage) + "/>$3");
         stage++;
     }
     while (stage) {
         stage--;
-        str = std::regex_replace(str, std::regex("(.*)(<mstr num=" + std::to_string(stage) + "/>)(.*)$"), "$1 <EXPR> " + stq.top() + " </EXPR> $3");
+        str = regex_replace(str, regex("(.*)(<mstr num=" + to_string(stage) + "/>)(.*)$"), "$1 <EXPR> " + stq.top() + " </EXPR> $3");
         stq.pop();
     }
     os << str;
     return;
 }
 
-void statementproc(std::string str, std::ostream& os) {
-    std::smatch res;
-    if (std::regex_match(str, res, std::regex("\\s*([a-zA-Z]+)\\s*=\\s*(.+)\\s*$"))) {
+void statementproc(string str, ostream& os) {
+    smatch res;
+    if (regex_match(str, res, regex("\\s*([a-zA-Z]+)\\s*=\\s*(.+)\\s*$"))) {
         os << "<ID id=\"" << res[1] << "\"/> ";
         os << "<EXPR> ";
-        std::stringstream strr;
+        stringstream strr;
         exprproc(res[2].str(), strr);
         parenthesesproc(strr, os);
         os << "</EXPR> ";
@@ -80,22 +82,22 @@ void statementproc(std::string str, std::ostream& os) {
     assert(false, str);
 }
 
-void idlistproc(std::string str, std::ostream& os) {
-    std::smatch res;
-    if (std::regex_match(str, res, std::regex("\\s*([a-zA-Z]+)\\s*,\\s*(.+)\\s*$"))) {
+void idlistproc(string str, ostream& os) {
+    smatch res;
+    if (regex_match(str, res, regex("\\s*([a-zA-Z]+)\\s*,\\s*(.+)\\s*$"))) {
         os << "<ID id=\"" << res[1] << "\"/> ";
         idlistproc(res[2].str(), os);
         return;
     }
-    if (std::regex_match(str, res, std::regex("\\s*([a-zA-Z]+)\\s*$"))) {
+    if (regex_match(str, res, regex("\\s*([a-zA-Z]+)\\s*$"))) {
         os << "<ID id=\"" << res[1] << "\"/> ";
         return;
     }
     assert(false, str);
 }
 
-void commandproc(std::string str, std::ostream& os) {
-    std::string tomatch[] = {
+void commandproc(string str, ostream& os) {
+    string tomatch[] = {
         "REM.*$",
         "LET\\s+([a-zA-Z]*)\\s*=\\s*(.+)\\s*$",
         "INPUT\\s(.+)\\s*$",
@@ -105,72 +107,72 @@ void commandproc(std::string str, std::ostream& os) {
         "FOR\\s+(.+)\\s*;\\s*(.+)\\s*$",
         "END\\s+FOR\\s*$",
         "\\s*([a-zA-Z]*)\\s*=\\s*(.+)\\s*$"};
-    std::smatch res;
-    if (std::regex_match(str, res, std::regex(tomatch[0]))) {
+    smatch res;
+    if (regex_match(str, res, regex(tomatch[0]))) {
         os << "<REM/> ";
         return;
     }
-    if (std::regex_match(str, res, std::regex(tomatch[1]))) {
+    if (regex_match(str, res, regex(tomatch[1]))) {
         os << "<LET id=\"" << res[1].str() << "\"> ";
         os << "<EXPR> ";
-        std::stringstream strr;
+        stringstream strr;
         exprproc(res[2].str(), strr);
         parenthesesproc(strr, os);
         os << "</EXPR> ";
         os << "</LET> ";
         return;
     }
-    if (std::regex_match(str, res, std::regex(tomatch[2]))) {
+    if (regex_match(str, res, regex(tomatch[2]))) {
         os << "<INPUT> ";
         idlistproc(res[1].str(), os);
         os << "</INPUT> ";
         return;
     }
-    if (std::regex_match(str, res, std::regex(tomatch[3]))) {
+    if (regex_match(str, res, regex(tomatch[3]))) {
         os << "<EXIT> ";
         os << "<EXPR> ";
-        std::stringstream strr;
+        stringstream strr;
         exprproc(res[1].str(), strr);
         parenthesesproc(strr, os);
         os << "</EXPR> ";
         os << "</EXIT> ";
         return;
     }
-    if (std::regex_match(str, res, std::regex(tomatch[4]))) {
+    if (regex_match(str, res, regex(tomatch[4]))) {
         os << "<GOTO dest=\"" << res[1] << "\"/> ";
         return;
     }
-    if (std::regex_match(str, res, std::regex(tomatch[5]))) {
+    if (regex_match(str, res, regex(tomatch[5]))) {
         os << "<IF dest=\"" << res[2] << "\"> ";
         os << "<EXPR> ";
-        std::stringstream strr;
+        stringstream strr;
         exprproc(res[1].str(), strr);
         parenthesesproc(strr, os);
         os << "</EXPR> ";
         os << "</IF> ";
         return;
     }
-    if (std::regex_match(str, res, std::regex(tomatch[6]))) {
+    if (regex_match(str, res, regex(tomatch[6]))) {
         os << "<FOR> ";
         os << "<STAM>";
         statementproc(res[1].str(), os);
         os << "</STAM>";
         os << "<EXPR> ";
-        std::stringstream strr;
+        stringstream strr;
         exprproc(res[2].str(), strr);
         parenthesesproc(strr, os);
         os << "</EXPR> ";
         os << "</FOR> ";
         return;
     }
-    if (std::regex_match(str, res, std::regex(tomatch[7]))) {
+    if (regex_match(str, res, regex(tomatch[7]))) {
         os << "<EF/> ";
         return;
     }
-    if (std::regex_match(str, res, std::regex(tomatch[8]))) {
+    if (regex_match(str, res, regex(tomatch[8]))) {
         os << "<SET id=\"" << res[1].str() << "\"> ";
         os << "<EXPR> ";
-        std::stringstream strr;
+        stringstream strr;
         exprproc(res[2].str(), strr);
         parenthesesproc(strr, os);
         os << "</EXPR> ";
@@ -181,12 +183,12 @@ void commandproc(std::string str, std::ostream& os) {
     return;
 }
 
-void lineproc(std::istream& is, std::ostream& os) {
-    std::string str;
-    std::smatch res;
+void lineproc(istream& is, ostream& os) {
+    string str;
+    smatch res;
     os << "<PRGM> ";
     while (getline(is, str)) {
-        assert(std::regex_match(str, res, std::regex("\\s*([0-9]+)\\s+(.*)$")), str);
+        assert(regex_match(str, res, regex("\\s*([0-9]+)\\s+(.*)$")), str);
         os << "<LINE linenum=\"" << res[1] << "\"/> ";
         commandproc(res[2].str(), os);
     }

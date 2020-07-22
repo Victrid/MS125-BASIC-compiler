@@ -13,6 +13,7 @@ void assert(bool b, std::string str);
 
 void exprproc(std::string str, std::ostream& os);
 void statementproc(std::string str, std::ostream& os);
+void parenthesesproc(std::istream& is, std::ostream& os);
 void idlistproc(std::string str, std::ostream& os);
 void commandproc(std::string str, std::ostream& os);
 
