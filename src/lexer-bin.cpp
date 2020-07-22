@@ -14,8 +14,8 @@ int main(int argc, char** argv) {
     case 3: {
         fstream f1, f2;
         f1.open(argv[1]);
-        f2.open(argv[2], ios::trunc);
-        if ((!f1) && (!f2))
+        f2.open(argv[2],ios::out);
+        if ((!f1) || (!f2))
             throw exception();
         lineproc(f1, f2);
     } break;

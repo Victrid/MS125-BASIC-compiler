@@ -2,6 +2,9 @@
 
 using namespace std;
 
+static const string vv[]   = {"||", "&&", "==", "!=", "<=", ">=", "<", ">", "-", "+", "/", "*"};
+static const string cont[] = {"or", "and", "eq", "ne", "le", "ge", "l", "g", "min", "add", "div", "mul"};
+
 void assert(bool b, string str) {
     if (!b)
         throw logic_error("Parse Error: " + str);
@@ -10,12 +13,24 @@ void assert(bool b, string str) {
 void exprproc(string str, ostream& os) {
     smatch res;
     if (regex_match(str, res, regex("\\s*(\\|\\||&&|==|!=|<=|>=)\\s*(.*)\\s*$"))) {
-        os << "<SYM symnum=\"" << res[1].str() << "\"/> ";
+        for (int i = 0; i <= 12; i++) {
+            assert(i != 12, str);
+            if (vv[i] == res[1].str()) {
+                os << "<SYM symnum=\"" << cont[i] << "\"/> ";
+                break;
+            }
+        }
         exprproc(res[2].str(), os);
         return;
     }
     if (regex_match(str, res, regex("\\s*(<|>|-|\\+|/|\\*)\\s*(.*)\\s*$"))) {
-        os << "<SYM symnum=\"" << res[1].str() << "\"/> ";
+        for (int i = 0; i <= 12; i++) {
+            assert(i != 12, str);
+            if (vv[i] == res[1].str()) {
+                os << "<SYM symnum=\"" << cont[i] << "\"/> ";
+                break;
+            }
+        }
         exprproc(res[2].str(), os);
         return;
     }
