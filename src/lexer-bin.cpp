@@ -4,6 +4,7 @@ int main(int argc, char** argv) {
     switch (argc) {
     case 1:
         lex_inputline(cin, cout);
+        break;
     case 2: {
         fstream f;
         f.open(argv[1]);
@@ -14,7 +15,7 @@ int main(int argc, char** argv) {
     case 3: {
         fstream f1, f2;
         f1.open(argv[1]);
-        f2.open(argv[2],ios::out);
+        f2.open(argv[2], ios::out);
         if ((!f1) || (!f2))
             throw exception();
         lex_inputline(f1, f2);

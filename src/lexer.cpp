@@ -7,7 +7,7 @@ static const string cont[] = {"or", "and", "eq", "ne", "le", "ge", "l", "g", "mi
 
 void lingual_assert(bool b, string str) {
     if (!b)
-        throw logic_error("Parse Error: " + str);
+        throw logic_error("Lex Error: " + str);
 }
 
 void lex_expression(string str, ostream& os) {
