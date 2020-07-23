@@ -76,7 +76,7 @@ void lex_parentheses(istream& is, ostream& os) {
     }
     while (stage) {
         stage--;
-        str = regex_replace(str, regex("(.*)(<mstr num=" + to_string(stage) + "/>)(.*)$"), "$1 <EXPR> " + stq.top() + " </EXPR> $3");
+        str = regex_replace(str, regex("(.*)(<mstr num=" + to_string(stage) + "/>)(.*)$"), "$1<EXPR> " + stq.top() + "</EXPR> $3");
         stq.pop();
     }
     os << str;
@@ -121,7 +121,9 @@ void lex_commands(string str, ostream& os) {
         "IF\\s+(.+)\\s+THEN\\s+([0-9]+)\\s*$",
         "FOR\\s+(.+)\\s*;\\s*(.+)\\s*$",
         "END\\s+FOR\\s*$",
-        "\\s*([a-zA-Z]*)\\s*=\\s*(.+)\\s*$"};
+        "\\s*([a-zA-Z]*)\\s*=\\s*(.+)\\s*$",
+        "EXIT\\*s$",
+    };
     smatch res;
     if (regex_match(str, res, regex(tomatch[0]))) {
         os << "<REM/> ";
@@ -169,9 +171,9 @@ void lex_commands(string str, ostream& os) {
     }
     if (regex_match(str, res, regex(tomatch[6]))) {
         os << "<FOR> ";
-        os << "<STAM>";
+        os << "<STAM> ";
         lex_statement(res[1].str(), os);
-        os << "</STAM>";
+        os << "</STAM> ";
         os << "<EXPR> ";
         stringstream strr;
         lex_expression(res[2].str(), strr);
@@ -192,6 +194,14 @@ void lex_commands(string str, ostream& os) {
         lex_parentheses(strr, os);
         os << "</EXPR> ";
         os << "</SET> ";
+        return;
+    }
+    if (regex_match(str, res, regex(tomatch[9]))) {
+        os << "<EXIT> ";
+        os << "<EXPR> ";
+        os << "<NUM number=\"0\"> ";
+        os << "</EXPR> ";
+        os << "</EXIT> ";
         return;
     }
     lingual_assert(false, str);

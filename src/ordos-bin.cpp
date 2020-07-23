@@ -1,16 +1,22 @@
+#include "ordos.hpp"
 #include "parser.hpp"
 using namespace std;
 int main(int argc, char** argv) {
     switch (argc) {
-    case 1:
-        pexpr(cin, cout);
-        break;
+    case 1: {
+        node t = buildtree(cin);
+        orderconstruct(&t);
+        cout << t;
+    } break;
     case 2: {
         fstream f;
         f.open(argv[1]);
         if (!f)
             throw exception();
-        pexpr(f, cout);
+        node t = buildtree(f);
+        orderconstruct(&t);
+        cout << t;
+        f.close();
     } break;
     case 3: {
         fstream f1, f2;
@@ -18,7 +24,11 @@ int main(int argc, char** argv) {
         f2.open(argv[2], ios::out);
         if ((!f1) || (!f2))
             throw exception();
-        pexpr(f1, f2);
+        node t = buildtree(f1);
+        orderconstruct(&t);
+        f2 << t;
+        f1.close();
+        f2.close();
     } break;
     default:
         throw invalid_argument("Wrong argument!");

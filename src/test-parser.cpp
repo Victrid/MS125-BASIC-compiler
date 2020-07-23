@@ -3,29 +3,49 @@
 #include <gtest/gtest.h>
 using namespace std;
 
-#define C(AAA)                                                           \
-    TEST(ControlparseTest, AAA) {                                        \
-        fstream f;                                                       \
-        stringstream os;                                                 \
-        f.open("testfiles/testcases/control_test/control_" #AAA ".txt"); \
-        lex_inputline(f, os);                                            \
-        EXPECT_NO_THROW(buildtree(os));                                  \
+#define C(AAA)                                                            \
+    TEST(ControlparseTest, AAA) {                                         \
+        fstream f1, f2;                                                   \
+        stringstream os, ms, vs, ts, as;                                  \
+        f1.open("testfiles/testcases/control_test/control_" #AAA ".txt"); \
+        f2.open("testfiles/testcases/control_test/control_" #AAA ".txt"); \
+        lex_inputline(f1, os);                                            \
+        lex_inputline(f2, vs);                                            \
+        f1.close();                                                       \
+        f2.close();                                                       \
+        ms << os.rdbuf();                                                 \
+        ts << buildtree(vs);                                              \
+        EXPECT_EQ(ts.str(), ms.str());                                    \
     }
 
-#define B(AAA)                                                       \
-    TEST(BasicparseTest, AAA) {                                      \
-        fstream os, f;                                               \
-        f.open("testfiles/testcases/basic_test/basic_" #AAA ".txt"); \
-        lex_inputline(f, os);                                        \
-        EXPECT_NO_THROW(buildtree(os));                              \
+#define B(AAA)                                                        \
+    TEST(BasicparseTest, AAA) {                                       \
+        fstream f1, f2;                                               \
+        stringstream os, ms, vs, ts, as;                              \
+        f1.open("testfiles/testcases/basic_test/basic_" #AAA ".txt"); \
+        f2.open("testfiles/testcases/basic_test/basic_" #AAA ".txt"); \
+        lex_inputline(f1, os);                                        \
+        lex_inputline(f2, vs);                                        \
+        f1.close();                                                   \
+        f2.close();                                                   \
+        ms << os.rdbuf();                                             \
+        ts << buildtree(vs);                                          \
+        EXPECT_EQ(ts.str(), ms.str());                                \
     }
 
-#define O(AAA)                                                 \
-    TEST(OpparseTest, AAA) {                                   \
-        fstream os, f;                                         \
-        f.open("testfiles/testcases/op_test/op_" #AAA ".txt"); \
-        lex_inputline(f, os);                                  \
-        EXPECT_NO_THROW(buildtree(os));                        \
+#define O(AAA)                                                  \
+    TEST(OpparseTest, AAA) {                                    \
+        fstream f1, f2;                                         \
+        stringstream os, ms, vs, ts, as;                        \
+        f1.open("testfiles/testcases/op_test/op_" #AAA ".txt"); \
+        f2.open("testfiles/testcases/op_test/op_" #AAA ".txt"); \
+        lex_inputline(f1, os);                                  \
+        lex_inputline(f2, vs);                                  \
+        f1.close();                                             \
+        f2.close();                                             \
+        ms << os.rdbuf();                                       \
+        ts << buildtree(vs);                                    \
+        EXPECT_EQ(ts.str(), ms.str());                          \
     }
 
 O(1);

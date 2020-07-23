@@ -16,3 +16,8 @@ test_parser:
   stage: test
   script:
     - make unit_test_parser
+
+test_orderer:
+  stage: test
+  script:
+    - make unit_test_orderer

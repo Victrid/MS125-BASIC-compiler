@@ -7,7 +7,7 @@ void parsing_assert(bool b, std::string str) {
         throw std::logic_error("Parse Error: " + str);
 }
 
-bool node::isleaf() { return leaf; }
+bool node::isleaf() const { return leaf; }
 
 void node::addchild(node* n) {
     leaf = false;
@@ -17,12 +17,14 @@ void node::addchild(node* n) {
 void node::fill_attrib(const string& str) {
     smatch res;
     if (regex_match(str, res, regex("<(.+)\\s+(.+)=\"(.+)\"/?>"))) {
-        klass  = res[1].str();
-        attrib = res[2].str();
-        value  = res[3].str();
-    } else if (regex_match(str, res, regex("<(.+?)/?>")))
-        klass = res[1].str();
-    else
+        klass     = res[1].str();
+        attrib    = res[2].str();
+        value     = res[3].str();
+        hasattrib = true;
+    } else if (regex_match(str, res, regex("<(.+?)/?>"))) {
+        klass     = res[1].str();
+        hasattrib = false;
+    } else
         parsing_assert(false, str);
 };
 
@@ -55,4 +57,29 @@ node buildtree(istream& is) {
     ost << is.rdbuf();
     string str = ost.str();
     return node(str);
+}
+
+std::ostream& operator<<(std::ostream& os, const node& obj) {
+    os << "<" << obj.klass;
+    if (obj.hasattrib) {
+        os << " " << obj.attrib << "=\"" << obj.value << "\"";
+    }
+    if (!obj.isleaf()) {
+        os << "> ";
+        for (auto i = obj.child.begin(); i != obj.child.end(); i++)
+            os << (*(*i));
+        os << "</" << obj.klass << "> ";
+    } else {
+        os << "/> ";
+    }
+    return os;
+}
+
+vector<node*> node::selectsonbyclass(string classname) {
+    vector<node*> ns;
+    for (auto i = child.begin(); i != child.end(); i++) {
+        if ((**i).klass == classname)
+            ns.push_back(*i);
+    }
+    return ns;
 }
