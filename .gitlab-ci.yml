@@ -20,4 +20,4 @@ test_parser:
 test_orderer:
   stage: test
   script:
-    - make unit_test_orderer
+    - make unit_test_ordos
