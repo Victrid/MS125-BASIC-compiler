@@ -24,3 +24,9 @@ test_orderer:
   stage: test
   script:
     - make unit_test_ordos
+
+test_cfg:
+  stage: test
+  script:
+    - make unit_test_cfg
+    

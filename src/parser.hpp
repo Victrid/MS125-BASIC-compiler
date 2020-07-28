@@ -17,6 +17,9 @@ class node {
 private:
     friend std::ostream& operator<<(std::ostream& os, const node& obj);
     friend void orderselect(node* n);
+    friend void cfgize_labelproc(std::istream& is, std::ostream& os);
+    friend void cfgize_symbolproc(std::istream& is, std::ostream& os);
+
     bool leaf      = true;
     bool hasattrib = false;
 
