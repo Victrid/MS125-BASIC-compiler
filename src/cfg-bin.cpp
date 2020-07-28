@@ -8,7 +8,8 @@ int main(int argc, char** argv) {
         stringstream sttl, sttt;
         sttl << t;
         cfgize_labelproc(sttl, sttt);
-        cfgize_symbolproc(sttt, cout);
+        cfgize_symbolproc(sttt, sttl);
+        forclosure(sttl, cout);
     } break;
     case 2: {
         fstream f;
@@ -19,7 +20,8 @@ int main(int argc, char** argv) {
         stringstream sttl, sttt;
         sttl << t;
         cfgize_labelproc(sttl, sttt);
-        cfgize_symbolproc(sttt, cout);
+        cfgize_symbolproc(sttt, sttl);
+        forclosure(sttl, cout);
         f.close();
     } break;
     case 3: {
@@ -32,7 +34,8 @@ int main(int argc, char** argv) {
         stringstream sttl, sttt;
         sttl << t;
         cfgize_labelproc(sttl, sttt);
-        cfgize_symbolproc(sttt, f2);
+        cfgize_symbolproc(sttt, sttl);
+        forclosure(sttl, f2);
         f1.close();
         f2.close();
     } break;

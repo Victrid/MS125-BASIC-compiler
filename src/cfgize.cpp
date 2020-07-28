@@ -87,3 +87,25 @@ void cfgize_symbolproc(istream& is, ostream& os) {
     os << n;
     return;
 }
+
+void forclosure(istream& is, ostream& os) {
+    //check symbols
+    node n = buildtree(is);
+    stack<string> fortagstack;
+    for (auto i = n.child.begin(); i != n.child.end(); i++) {
+        if ((*i)->klass == "FOR") {
+            fortagstack.push((*(i - 1))->value);
+        }
+        if ((*i)->klass == "EF") {
+            string addr = fortagstack.top();
+            fortagstack.pop();
+            (*i)->klass     = "GOTO";
+            (*i)->hasattrib = true;
+            (*i)->attrib    = "dest";
+            (*i)->value     = addr;
+        }
+    }
+    symbol_assert(fortagstack.empty(),"For tag unclosed.");
+    os << n;
+    return;
+}

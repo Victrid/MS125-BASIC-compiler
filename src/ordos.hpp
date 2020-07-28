@@ -20,5 +20,6 @@ void orderconstruct(node* n);
 
 void cfgize_labelproc(std::istream& is, std::ostream& os);
 void cfgize_symbolproc(std::istream& is, std::ostream& os);
+void forclosure(std::istream& is, std::ostream& os);
 
 #endif

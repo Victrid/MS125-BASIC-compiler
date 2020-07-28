@@ -15,7 +15,8 @@ using namespace std;
         orderconstruct(&t);                                               \
         sttl << t;                                                        \
         cfgize_labelproc(sttl, sttt);                                     \
-        EXPECT_NO_THROW(cfgize_symbolproc(sttt, sttl));                   \
+        cfgize_symbolproc(sttt, sttl);                                    \
+        EXPECT_NO_THROW(forclosure(sttl, sttt));                          \
     }
 
 #define B(AAA)                                                        \
@@ -29,7 +30,8 @@ using namespace std;
         orderconstruct(&t);                                           \
         sttl << t;                                                    \
         cfgize_labelproc(sttl, sttt);                                 \
-        EXPECT_NO_THROW(cfgize_symbolproc(sttt, sttl));               \
+        cfgize_symbolproc(sttt, sttl);                                \
+        EXPECT_NO_THROW(forclosure(sttl, sttt));                      \
     }
 
 #define O(AAA)                                                  \
@@ -43,7 +45,8 @@ using namespace std;
         orderconstruct(&t);                                     \
         sttl << t;                                              \
         cfgize_labelproc(sttl, sttt);                           \
-        EXPECT_NO_THROW(cfgize_symbolproc(sttt, sttl));         \
+        cfgize_symbolproc(sttt, sttl);                          \
+        EXPECT_NO_THROW(forclosure(sttl, sttt));                \
     }
 
 O(1);
