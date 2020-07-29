@@ -2,28 +2,39 @@
 #include <stack>
 using namespace std;
 class translator {
-public:
-    void calc(node* n, ostream& os) {
+private:
+    void start(ostream& os) {
+        os << "label_init:" << endl
+           << "lui sp, 256" << endl
+           << "lui gp, 2048" << endl
+           << "jal ra, label_main" << endl
+           << "addi a0, x0, 255" << endl
+           << "label_main:" << endl;
+    }
+
+    void l_calc(node* n, ostream& os) {
         //USES t0,t1,t2
         //answer stored to a0.
         if (n->child[0]->klass == "CALC") {
-            calc(n->child[0], os);
-            os << "mv t0, a0" << endl;
+            l_calc(n->child[0], os);
+            os << "push a0" << endl;
         } else if (n->child[0]->klass == "ID") {
-            loadmem(n->child[0]->value, os);
-            os << "mv t0, a0" << endl;
+            loadvariable(n->child[0]->value, os);
+            os << "push a0" << endl;
         } else if (n->child[0]->klass == "NUM") {
             os << "li t0, " << n->child[0]->value << endl;
+            os << "push t0" << endl;
         }
         if (n->child[1]->klass == "CALC") {
-            calc(n->child[1], os);
+            l_calc(n->child[1], os);
             os << "mv t1, a0" << endl;
         } else if (n->child[1]->klass == "ID") {
-            loadmem(n->child[1]->value, os);
+            loadvariable(n->child[1]->value, os);
             os << "mv t1, a0" << endl;
         } else if (n->child[1]->klass == "NUM") {
             os << "li t1," << n->child[1]->value << endl;
         }
+        os << "pop t0" << endl;
         if (n->value == "or") {
             os << "or a0,t0,t1" << endl;
         } else if (n->value == "and") {
@@ -58,9 +69,9 @@ public:
         return;
     }
 
-    void expr(node* n, ostream& os) {
+    void l_expr(node* n, ostream& os) {
         if (n->klass == "ID") {
-            loadmem(n->value, os);
+            loadvariable(n->value, os);
             return;
         }
         if (n->klass == "NUM") {
@@ -68,43 +79,92 @@ public:
             return;
         }
         if (n->klass == "CALC") {
-            calc(n, os);
+            l_calc(n, os);
             return;
         }
         //ASSERT
     }
 
-    void stam(node* n, ostream& os) {
+    void l_stam(node* n, ostream& os) {
         //uses t0
-        expr(n->child[1], os);
-        storemem(n->child[0]->value, os);
+        l_expr(n->child[1], os);
+        storevariable(n->child[0]->value, os);
     }
 
-    void let(node* n, ostream& os) {
-        expr(n->child[1], os);
-        storemem(n->value, os);
+    void l_let(node* n, ostream& os) {
+        l_expr(n->child[1], os);
+        storevariable(n->value, os);
     }
 
     void label(node* n, ostream& os) {
         os << "label_" << n->value << ":" << endl;
     }
 
-    void input(node* n, ostream& os) {
+    void l_input(node* n, ostream& os) {
         for (auto i : n->child) {
             os << "input" << endl;
-            storemem(i->value, os);
+            storevariable(i->value, os);
         }
     }
 
-    void ifcase(node* n, ostream& os) {
-        //TODO
+    void l_if(node* n, ostream& os) {
+        l_expr(n->child[0], os);
+        os << "bne x0, a0, label_" << n->value << endl;
     }
 
-    void loadmem(string str, ostream& os) {
-        //load to a0
+    void l_for(node* n, ostream& os) {
+        l_expr(n->child[1], os);
+        os << "beq x0, a0, label_" << n->value << endl;
+        l_stam(n->child[0], os);
     }
 
-    void storemem(string str, ostream& os) {
-        //store a0
+    void l_goto(node* n, ostream& os) {
+        os << "j " << n->value << endl;
+    }
+
+    void loadvariable(string str, ostream& os) {
+        os << "lw a0, gp, " << stoi(str.substr(3));
+    }
+
+    void storevariable(string str, ostream& os) {
+        os << "sw a0, gp, " << stoi(str.substr(3));
+    }
+
+    void l_end(ostream& os) {
+        os << "ret" << endl;
+    }
+
+    void l_exit(node* n, ostream& os) {
+        if (n->child.empty()) {
+            os << "mv a0, x0" << endl;
+        } else {
+            l_expr(n->child[0], os);
+        }
+        l_end(os);
+    }
+
+public:
+    void translate(node* prgm, ostream& os) {
+        start(os);
+        for (auto i : prgm->child) {
+            if (i->klass == "INPUT") {
+                l_input(i, os);
+            } else if (i->klass == "LINE") {
+                label(i, os);
+            } else if (i->klass == "LET") {
+                l_let(i, os);
+            } else if (i->klass == "EXIT") {
+                l_exit(i, os);
+            } else if (i->klass == "GOTO") {
+                l_goto(i, os);
+            } else if (i->klass == "IF") {
+                l_if(i, os);
+            } else if (i->klass == "FOR") {
+                l_for(i, os);
+            } else
+                ; //ASSERT
+        }
+        os << "mv a0, x0" << endl;
+        l_end(os);
     }
 };
