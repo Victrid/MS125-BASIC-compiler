@@ -8,7 +8,7 @@ private:
            << "lui sp, 256" << endl
            << "lui gp, 2048" << endl
            << "jal ra, label_main" << endl
-           << "addi a0, x0, 255" << endl
+           << "addi a0, zero, 255" << endl
            << "label_main:" << endl;
     }
 
@@ -24,18 +24,18 @@ private:
             os << "addi sp, sp, 4" << endl;
             os << "sw a0, 0(sp) " << endl;
         } else if (n->child[0]->klass == "NUM") {
-            os << "addi t0, x0, " << n->child[0]->value << endl;
+            os << "addi t0, zero, " << n->child[0]->value << endl;
             os << "addi sp, sp, 4" << endl;
             os << "sw t0, 0(sp) " << endl;
         }
         if (n->child[1]->klass == "CALC") {
             l_calc(n->child[1], os);
-            os << "add t1, a0, x0" << endl;
+            os << "add t1, a0, zero" << endl;
         } else if (n->child[1]->klass == "ID") {
             loadvariable(n->child[1]->value, os);
-            os << "add t1, a0, x0" << endl;
+            os << "add t1, a0, zero" << endl;
         } else if (n->child[1]->klass == "NUM") {
-            os << "addi t1, x0, " << n->child[1]->value << endl;
+            os << "addi t1, zero, " << n->child[1]->value << endl;
         }
         os << "lw t0, 0(sp) " << endl;
         os << "addi sp, sp, -4" << endl;
@@ -79,7 +79,7 @@ private:
             return;
         }
         if (n->klass == "NUM") {
-            os << "addi a0, x0, " << n->value << endl;
+            os << "addi a0, zero, " << n->value << endl;
             return;
         }
         if (n->klass == "CALC") {
@@ -113,17 +113,17 @@ private:
 
     void l_if(node* n, ostream& os) {
         l_expr(n->child[0], os);
-        os << "bne x0, a0, label_" << n->value << endl;
+        os << "bne zero, a0, label_" << n->value << endl;
     }
 
     void l_for(node* n, ostream& os) {
         l_expr(n->child[1], os);
-        os << "beq x0, a0, label_" << n->value << endl;
+        os << "beq zero, a0, label_" << n->value << endl;
         l_stam(n->child[0], os);
     }
 
     void l_goto(node* n, ostream& os) {
-        os << "j "
+        os << "jal zero, "
            << "label_" << n->value << endl;
     }
 
@@ -136,12 +136,12 @@ private:
     }
 
     void l_end(ostream& os) {
-        os << "ret" << endl;
+        os << "jalr zero, 0(ra)" << endl;
     }
 
     void l_exit(node* n, ostream& os) {
         if (n->child.empty()) {
-            os << "add a0, x0, x0" << endl;
+            os << "add a0, zero, zero" << endl;
         } else {
             l_expr(n->child[0], os);
         }
@@ -169,7 +169,7 @@ public:
             } else
                 ; //ASSERT
         }
-        os << "add a0, x0, x0" << endl;
+        os << "add a0, zero, zero" << endl;
         l_end(os);
     }
 };
