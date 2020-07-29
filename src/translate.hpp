@@ -75,7 +75,7 @@ private:
             return;
         }
         if (n->klass == "NUM") {
-            os << "li a0," << n->child[1]->value << endl;
+            os << "li a0," << n->value << endl;
             return;
         }
         if (n->klass == "CALC") {
@@ -92,7 +92,7 @@ private:
     }
 
     void l_let(node* n, ostream& os) {
-        l_expr(n->child[1], os);
+        l_expr(n->child[0], os);
         storevariable(n->value, os);
     }
 
@@ -119,15 +119,16 @@ private:
     }
 
     void l_goto(node* n, ostream& os) {
-        os << "j " << n->value << endl;
+        os << "j "
+           << "label_" << n->value << endl;
     }
 
     void loadvariable(string str, ostream& os) {
-        os << "lw a0, gp, " << stoi(str.substr(3));
+        os << "lw a0, gp, " << stoi(str.substr(3)) * 32 << endl;
     }
 
     void storevariable(string str, ostream& os) {
-        os << "sw a0, gp, " << stoi(str.substr(3));
+        os << "sw a0, gp, " << stoi(str.substr(3)) * 32 << endl;
     }
 
     void l_end(ostream& os) {
