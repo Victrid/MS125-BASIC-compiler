@@ -29,4 +29,9 @@ test_cfg:
   stage: test
   script:
     - make unit_test_cfg
+
+test_trans:
+  stage: test
+  script:
+    - make unit_test_tr
     

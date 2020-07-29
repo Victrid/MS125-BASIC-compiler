@@ -17,24 +17,28 @@ private:
         //answer stored to a0.
         if (n->child[0]->klass == "CALC") {
             l_calc(n->child[0], os);
-            os << "push a0" << endl;
+            os << "addi sp, sp, 4" << endl;
+            os << "sw a0, 0(sp) " << endl;
         } else if (n->child[0]->klass == "ID") {
             loadvariable(n->child[0]->value, os);
-            os << "push a0" << endl;
+            os << "addi sp, sp, 4" << endl;
+            os << "sw a0, 0(sp) " << endl;
         } else if (n->child[0]->klass == "NUM") {
-            os << "li t0, " << n->child[0]->value << endl;
-            os << "push t0" << endl;
+            os << "addi t0, x0, " << n->child[0]->value << endl;
+            os << "addi sp, sp, 4" << endl;
+            os << "sw t0, 0(sp) " << endl;
         }
         if (n->child[1]->klass == "CALC") {
             l_calc(n->child[1], os);
-            os << "mv t1, a0" << endl;
+            os << "add t1, a0, x0" << endl;
         } else if (n->child[1]->klass == "ID") {
             loadvariable(n->child[1]->value, os);
-            os << "mv t1, a0" << endl;
+            os << "add t1, a0, x0" << endl;
         } else if (n->child[1]->klass == "NUM") {
-            os << "li t1," << n->child[1]->value << endl;
+            os << "addi t1, x0, " << n->child[1]->value << endl;
         }
-        os << "pop t0" << endl;
+        os << "lw t0, 0(sp) " << endl;
+        os << "addi sp, sp, -4" << endl;
         if (n->value == "or") {
             os << "or a0,t0,t1" << endl;
         } else if (n->value == "and") {
@@ -75,7 +79,7 @@ private:
             return;
         }
         if (n->klass == "NUM") {
-            os << "li a0," << n->value << endl;
+            os << "addi a0, x0, " << n->value << endl;
             return;
         }
         if (n->klass == "CALC") {
@@ -124,11 +128,11 @@ private:
     }
 
     void loadvariable(string str, ostream& os) {
-        os << "lw a0, gp, " << stoi(str.substr(3)) * 32 << endl;
+        os << "lw a0, " << stoi(str.substr(3)) * 4 << "(gp) " << endl;
     }
 
     void storevariable(string str, ostream& os) {
-        os << "sw a0, gp, " << stoi(str.substr(3)) * 32 << endl;
+        os << "sw a0, " << stoi(str.substr(3)) * 4 << "(gp) " << endl;
     }
 
     void l_end(ostream& os) {
@@ -137,7 +141,7 @@ private:
 
     void l_exit(node* n, ostream& os) {
         if (n->child.empty()) {
-            os << "mv a0, x0" << endl;
+            os << "add a0, x0, x0" << endl;
         } else {
             l_expr(n->child[0], os);
         }
@@ -165,7 +169,7 @@ public:
             } else
                 ; //ASSERT
         }
-        os << "mv a0, x0" << endl;
+        os << "add a0, x0, x0" << endl;
         l_end(os);
     }
 };

@@ -1,5 +1,5 @@
 .PHONY: all
-all: lexer orderer cfgizer
+all: lexer orderer cfgizer translator
 	@echo "done"
 
 lexer: src/lexer-bin.cpp src/lexer.cpp src/lexer.hpp
