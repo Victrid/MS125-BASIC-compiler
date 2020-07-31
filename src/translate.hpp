@@ -1,8 +1,10 @@
 #include "parser.hpp"
 #include <stack>
+#include <vector>
 using namespace std;
 class translator {
 private:
+    vector<string> forgroups;
     void start(ostream& os) {
         os << "label_init:" << endl
            << "lui sp, 256" << endl
@@ -40,9 +42,9 @@ private:
         os << "lw t0, 0(sp) " << endl;
         os << "addi sp, sp, -4" << endl;
         if (n->value == "or") {
-            os << "or a0,t0,t1" << endl;
+            os << "or a0, t0, t1" << endl;
         } else if (n->value == "and") {
-            os << "and a0,t0,t1" << endl;
+            os << "and a0, t0, t1" << endl;
         } else if (n->value == "ne") {
             os << "sub a0, t0, t1" << endl;
             os << "sltu a0, zero, a0" << endl;
@@ -51,23 +53,23 @@ private:
             os << "sltu a0, zero, a0" << endl;
             os << "xori a0, a0, 1" << endl;
         } else if (n->value == "le") {
-            os << "sltu a0, t1, t0" << endl;
+            os << "slt a0, t1, t0" << endl;
             os << "xori a0, a0, 1" << endl;
         } else if (n->value == "ge") {
-            os << "sltu a0, t0, t1" << endl;
+            os << "slt a0, t0, t1" << endl;
             os << "xori a0, a0, 1" << endl;
         } else if (n->value == "g") {
-            os << "sltu a0, t0, t1" << endl;
+            os << "slt a0, t1, t0" << endl;
         } else if (n->value == "l") {
-            os << "sltu a0, t1, t0" << endl;
+            os << "slt a0, t0, t1" << endl;
         } else if (n->value == "min") {
             os << "sub a0, t0, t1" << endl;
         } else if (n->value == "add") {
-            os << "add a0, t1, t0" << endl;
+            os << "add a0, t0, t1" << endl;
         } else if (n->value == "mul") {
             os << "mul a0, t0, t1" << endl;
         } else if (n->value == "div") {
-            os << "div a0, t1, t0" << endl;
+            os << "div a0, t0, t1" << endl;
         } else { //ASSERT
         }
         return;
@@ -119,10 +121,15 @@ private:
     void l_for(node* n, ostream& os) {
         l_expr(n->child[1], os);
         os << "beq zero, a0, label_" << n->value << endl;
-        l_stam(n->child[0], os);
+        forgroups.push_back(n->attrib);
     }
 
     void l_goto(node* n, ostream& os) {
+        os << "jal zero, label_" << n->value << endl;
+    }
+
+    void l_forend(node* n, ostream& os) {
+        l_stam(n->child[0], os);
         os << "jal zero, "
            << "label_" << n->value << endl;
     }
@@ -151,6 +158,26 @@ private:
 public:
     void translate(node* prgm, ostream& os) {
         start(os);
+        for (auto i = prgm->child.begin(); i != prgm->child.end() - 1; i++) {
+            if ((*(i + 1))->klass == "FOR") {
+                int forg = 0;
+                stack<std::vector<node*>::iterator> st;
+                string andest;
+                for (auto j = i + 2;; j++) {
+                    if ((*j)->attrib == "dest" && (*j)->value == (*i)->value) {
+                        st.push(j);
+                    }
+                    if ((*(j + 1))->klass == "FOREND" && (*(j + 1))->value == (*i)->value) {
+                        andest = (*j)->value;
+                        break;
+                    }
+                }
+                while (!st.empty()) {
+                    (*st.top())->value = andest;
+                    st.pop();
+                }
+            }
+        }
         for (auto i : prgm->child) {
             if (i->klass == "INPUT") {
                 l_input(i, os);
@@ -166,8 +193,9 @@ public:
                 l_if(i, os);
             } else if (i->klass == "FOR") {
                 l_for(i, os);
-            } else
-                ; //ASSERT
+            } else if (i->klass == "FOREND") {
+                l_forend(i, os);
+            }; //ASSERT
         }
         os << "add a0, zero, zero" << endl;
         l_end(os);

@@ -7,10 +7,9 @@ void parsing_assert(bool b, std::string str) {
         throw std::logic_error("Parse Error: " + str);
 }
 
-bool node::isleaf() const { return leaf; }
+bool node::isleaf() const { return child.empty(); }
 
 void node::addchild(node* n) {
-    leaf = false;
     child.push_back(n);
 }
 

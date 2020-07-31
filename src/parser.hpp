@@ -22,7 +22,6 @@ private:
     friend void cfgize_symbolproc(std::istream& is, std::ostream& os);
     friend void forclosure(std::istream& is, std::ostream& os);
 
-    bool leaf      = true;
     bool hasattrib = false;
 
     std::vector<node*> child;

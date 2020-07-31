@@ -29,7 +29,7 @@ void cfgize_labelproc(istream& is, ostream& os) {
     }
     auto it = n.child.begin();
     while (it != n.child.end()) {
-        if ((*it)->klass == "LINE" && labelset.find(stoi((*it)->value)) == labelset.end() && ((it + 1 == n.child.end() || (*(it + 1))->klass != "FOR") && (it == n.child.begin() || (*(it - 1))->klass != "EF")))
+        if ((*it)->klass == "LINE" && labelset.find(stoi((*it)->value)) == labelset.end() && ((it + 1 == n.child.end() || (*(it + 1))->klass != "FOR") && (it == n.child.begin() || (*(it - 1))->klass != "EF") && (it + 1 == n.child.end() || (*(it + 1))->klass != "EF")))
             it = n.child.erase(it);
         else
             ++it;
@@ -99,10 +99,11 @@ void forclosure(istream& is, ostream& os) {
         if ((*i)->klass == "EF") {
             auto fortag = fortagstack.top();
             fortagstack.pop();
-            (*i)->klass          = "GOTO";
-            (*i)->hasattrib      = true;
-            (*i)->attrib         = "dest";
-            (*i)->value          = (*(fortag - 1))->value;
+            (*i)->klass     = "FOREND";
+            (*i)->hasattrib = true;
+            (*i)->attrib    = "dest";
+            (*i)->value     = (*(fortag - 1))->value;
+            (*i)->child.push_back(((*fortag)->child[0]));
             (*fortag)->hasattrib = true;
             (*fortag)->attrib    = "dest";
             (*fortag)->value     = (*(i + 1))->value;
