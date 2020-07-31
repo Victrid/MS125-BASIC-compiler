@@ -37,7 +37,7 @@ test_trans:
   script:
     - make unit_test_tr
     
-check_basictest:
+check:
   stage: checking
   script:
     - ./basictest.sh
