@@ -1,5 +1,5 @@
 .PHONY: all
-all: lexer orderer cfgizer translator asmpreproc
+all: lexer orderer cfgizer translator asmpreproc as
 	@echo "done"
 
 lexer: src/lexer-bin.cpp src/lexer.cpp src/lexer.hpp
@@ -16,6 +16,9 @@ translator: src/parser.cpp src/translator-bin.cpp src/translate.hpp src/parser.h
 
 asmpreproc: src/preproc-bin.cpp src/preproc.hpp
 	g++ -O3 src/preproc-bin.cpp -o asmpreproc
+
+as: src/as-bin.cpp src/as.hpp
+	g++ -O3 src/as-bin.cpp -o as
 
 test_lexer: src/lexer.cpp src/test-lexer.cpp
 	g++ -O3 src/lexer.cpp src/test-lexer.cpp -lgtest -o test_lexer
@@ -65,6 +68,8 @@ clean:
 	rm -f ./orderer
 	rm -f ./translator
 	rm -f ./asmpreproc
+	rm -f ./as
+	rm -f *.riscv
 	rm -f *.xml
 	rm -f *.asm
 	@echo "done"
