@@ -1,9 +1,11 @@
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
+  ANSIBLE_FORCE_COLOR: 'true'
 
 stages:
   - build
   - test
+  - checking
   
 build:
   stage: build
@@ -35,3 +37,9 @@ test_trans:
   script:
     - make unit_test_tr
     
+check_basictest:
+  stage: checking
+  script:
+    - ./basictest.sh
+    - ./optest.sh
+    - ./controltest.sh
