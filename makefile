@@ -1,7 +1,11 @@
 .PHONY: all
-all: lexer orderer cfgizer translator asmpreproc as
+all: lexer orderer cfgizer translator asmpreproc as riscv-core
 	@echo "done"
 
+riscv-core: simulator
+	$(MAKE) -C simulator
+	mv simulator/code riscv-core
+	
 lexer: src/lexer-bin.cpp src/lexer.cpp src/lexer.hpp
 	g++ -O3 src/lexer-bin.cpp src/lexer.cpp -o lexer
 
@@ -72,4 +76,11 @@ clean:
 	rm -f *.riscv
 	rm -f *.xml
 	rm -f *.asm
+	rm -f ./riscv-core
+	$(MAKE) -C simulator clean
 	@echo "done"
+	
+case_test:
+	./testscript/basictest.sh
+	./testscript/controltest.sh
+	./testscript/optest.sh
