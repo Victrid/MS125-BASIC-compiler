@@ -1,7 +1,7 @@
 [submodule "testfiles"]
 	path = testfiles
-	url = git@github.com:fulingyue/BASIC-Compiler.git
+	url = https://github.com/fulingyue/BASIC-Compiler.git
 [submodule "simulator"]
 	path = simulator
-	url = git@github.com:Victrid/RISC-V-simulator.git
+	url = https://github.com/Victrid/RISC-V-compiler.git
 	branch = compiler-variation
