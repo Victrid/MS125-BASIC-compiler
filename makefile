@@ -81,6 +81,6 @@ clean:
 	@echo "done"
 	
 case_test:
-	./testscript/basictest.sh
-	./testscript/controltest.sh
-	./testscript/optest.sh
+	./testscript/test.sh testfiles/testcases/basic_test
+	./testscript/test.sh testfiles/testcases/op_test
+	./testscript/test.sh testfiles/testcases/control_test
